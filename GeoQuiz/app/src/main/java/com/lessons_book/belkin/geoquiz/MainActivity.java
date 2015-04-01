@@ -36,6 +36,11 @@ public class MainActivity extends ActionBarActivity {
             new TrueFalse(R.string.question_asia, true),
     };
 
+    private boolean[] mCheatBank = new boolean[mQuestionBank.length];
+    /*for(int i=0; i<mQuestionBank.length; i++){
+        mCheatBank[i] = false;
+    }*/
+
     private int mCurrentIndex = 0;
 
     private void updateQuestion(){
@@ -48,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
 
         int messageResId = 0;
 
-        if (mIsCheater) {
+        if (mCheatBank[mCurrentIndex]) {
             messageResId = R.string.judgment_toast;
         } else {
             if (userPressedTrue == answerIsTrue) {
@@ -69,6 +74,7 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
         mIsCheater = data.getBooleanExtra(CheatActivity.EXTRA_ANSWER_SHOW, false);
+        mCheatBank[mCurrentIndex] = mIsCheater;
     }
 
     @Override
@@ -76,7 +82,7 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
-        savedInstanceState.putBoolean(KEY_CHEATER, mIsCheater);
+        savedInstanceState.putBooleanArray(KEY_CHEATER, mCheatBank);
     }
 
     @Override
@@ -87,7 +93,7 @@ public class MainActivity extends ActionBarActivity {
 
         if(savedInstanceState != null){
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
-            mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER);
+            mCheatBank = savedInstanceState.getBooleanArray(KEY_CHEATER);
         }
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
@@ -145,7 +151,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                mIsCheater = false;
+                //mIsCheater = false;
                 updateQuestion();
             }
         });

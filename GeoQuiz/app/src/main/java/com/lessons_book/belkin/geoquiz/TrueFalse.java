@@ -6,6 +6,7 @@ package com.lessons_book.belkin.geoquiz;
 public class TrueFalse {
     private int mQuestion;
     private boolean mTrueQuestion;
+    private boolean mIsCheat;
 
     TrueFalse(int question, boolean trueQuestion){
         mQuestion = question;
@@ -26,5 +27,13 @@ public class TrueFalse {
 
     public void setTrueQuestion(boolean trueQuestion) {
         mTrueQuestion = trueQuestion;
+    }
+
+    public boolean isCheat() {
+        return mIsCheat;
+    }
+
+    public void setCheat(boolean isCheat) {
+        mIsCheat = isCheat;
     }
 }
