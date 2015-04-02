@@ -1,6 +1,7 @@
 package com.lessons_book.belkin.geoquiz;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -95,6 +96,9 @@ public class MainActivity extends ActionBarActivity {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
             mCheatBank = savedInstanceState.getBooleanArray(KEY_CHEATER);
         }
+
+        TextView mLevelAPITextView = (TextView)findViewById(R.id.level_API_textView);
+        mLevelAPITextView.setText("API level is " + Build.VERSION.SDK_INT);
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
