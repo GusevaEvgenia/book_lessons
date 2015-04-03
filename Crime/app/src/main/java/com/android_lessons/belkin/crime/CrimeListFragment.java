@@ -43,7 +43,9 @@ public class CrimeListFragment extends ListFragment {
         Crime c = ((CrimeAdapter)getListAdapter()).getItem(position);
 
         // Запуск CrimeActivity
-        Intent i = new Intent(getActivity(), CrimeActivity.class);
+        //Intent i = new Intent(getActivity(), CrimeActivity.class);
+        // Запуск CrimePagerActivity с объектом Сrime
+        Intent i = new Intent(getActivity(), CrimePagerActivity.class);
         i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
         startActivity(i);
     }
