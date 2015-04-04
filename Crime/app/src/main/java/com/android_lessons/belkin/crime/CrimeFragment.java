@@ -52,7 +52,7 @@ public class CrimeFragment extends Fragment {
     }
 
     public void updateTime(){
-        mTimeButton.setText(DateFormat.format("HH:mm", mCrime.getDate()));
+        mTimeButton.setText(DateFormat.format("H:mm", mCrime.getDate()));
     }
 
     @Override
