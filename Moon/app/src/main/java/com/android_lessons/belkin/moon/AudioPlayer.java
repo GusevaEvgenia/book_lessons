@@ -8,12 +8,7 @@ import android.media.MediaPlayer;
  */
 public class AudioPlayer {
     private MediaPlayer mPlayer;
-    public void stop() {
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
-    }
+
     public void play(Context c) {
         stop();
         mPlayer = MediaPlayer.create(c, R.raw.one_small_step);
@@ -23,5 +18,21 @@ public class AudioPlayer {
             }
         });
         mPlayer.start();
+    }
+
+    public void pause() {
+        if (mPlayer.isPlaying()) {
+            mPlayer.pause();
+        } else {
+            mPlayer.start();
+        }
+    }
+
+
+    public void stop() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 }
