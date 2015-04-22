@@ -4,8 +4,11 @@ package com.android_lessons.belkin.crime;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;
@@ -37,6 +40,8 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_PHOTO = 3;
+    private static final int REQUEST_CONTACT = 2;
+    private static final int REQUEST_CALL = 4;
     private static final String TAG = "CrimeFragment";
 
     private Crime mCrime;
@@ -46,6 +51,9 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
+    private Button mSuspectButton;
+    private Button mCollButton;
+    private String telphone;
 
     private static final String DIALOG_IMAGE = "image";
 
@@ -87,6 +95,37 @@ public class CrimeFragment extends Fragment {
             Date date = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
             updateTime();
+        }
+        if (requestCode == REQUEST_CONTACT) {
+            Uri contactUri = data.getData();
+            // Определение полей, значения которых должны быть
+            // возвращены запросом.
+            String[] queryFields = new String[] {
+                    ContactsContract.Contacts.DISPLAY_NAME,
+                    ContactsContract.Contacts._ID
+            };
+            // Выполнение запроса - contactUri здесь выполняет функции
+            // условия "where"
+            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+            // Проверка получения результатов
+            if (c.getCount() == 0) {
+                c.close();
+                return;
+            }
+            // Извлечение первого столбца данных - имени подозреваемого.
+            c.moveToFirst();
+            String suspect = c.getString(0);
+            mCrime.setSuspect(suspect);
+            mSuspectButton.setText(suspect);
+
+            Cursor pCur = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = ?",
+                    new String[]{c.getString(1)}, null);
+            pCur.moveToFirst();
+            telphone = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+            pCur.close();
+            c.close();
         }
     }
 
@@ -189,6 +228,38 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        Button reportButton = (Button)v.findViewById(R.id.crime_reportButton);
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                i = Intent.createChooser(i, getString(R.string.send_report));
+                startActivity(i);
+            }
+        });
+
+        mSuspectButton = (Button)v.findViewById(R.id.crime_suspectButton);
+        mSuspectButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                startActivityForResult(i, REQUEST_CONTACT);
+            }
+        });
+
+        mCollButton = (Button)v.findViewById(R.id.coll_suspectButton);
+        if (mCrime.getSuspect() != null) {
+            mSuspectButton.setText(mCrime.getSuspect());
+            mCollButton.setEnabled(true);
+            mCollButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent i = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + telphone));
+                    startActivityForResult(i, REQUEST_CALL);
+                }
+            });
+        }
+
         return v;
     }
 
@@ -220,5 +291,26 @@ public class CrimeFragment extends Fragment {
     public void onStop() {
         super.onStop();
         PictureUtils.cleanImageView(mPhotoView);
+    }
+
+
+    private String getCrimeReport() {
+        String solvedString = null;
+        if (mCrime.isSolved()) {
+            solvedString = getString(R.string.crime_report_solved);
+        } else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+        String dateFormat = "EEE, MMM dd";
+        String dateString = DateFormat.format(dateFormat, mCrime.getDate()).toString();
+        String suspect = mCrime.getSuspect();
+        if (suspect == null) {
+            suspect = getString(R.string.crime_report_no_suspect);
+        } else {
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+        String report = getString(R.string.crime_report,
+                mCrime.getTitle(), dateString, solvedString, suspect);
+        return report;
     }
 }

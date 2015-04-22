@@ -3,6 +3,7 @@
     package="com.android_lessons.belkin.crime" >
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission  android:name="android.permission.READ_CONTACTS"/>
     <uses-feature android:name="android.hardware.camera" />
 
     <application
