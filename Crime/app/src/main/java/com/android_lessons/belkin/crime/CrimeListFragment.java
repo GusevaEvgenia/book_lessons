@@ -2,6 +2,7 @@ package com.android_lessons.belkin.crime;
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+
 /**
  * Created by Belkin on 02.04.2015.
  */
@@ -31,6 +34,30 @@ public class CrimeListFragment extends ListFragment {
 
     private ArrayList<Crime> mCrimes;
     private static final String TAG = "CrimeListFragment";
+
+    private Callbacks mCallbacks;
+
+    /**
+     * Обязательный интерфейс для активности-хоста.
+     */
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    public void updateUI() {
+        ((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,9 +151,10 @@ public class CrimeListFragment extends ListFragment {
         // Запуск CrimeActivity
         //Intent i = new Intent(getActivity(), CrimeActivity.class);
         // Запуск CrimePagerActivity с объектом Сrime
-        Intent i = new Intent(getActivity(), CrimePagerActivity.class);
+        /*Intent i = new Intent(getActivity(), CrimePagerActivity.class);
         i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
-        startActivity(i);
+        startActivity(i);*/
+        mCallbacks.onCrimeSelected(c);
     }
 
     @Override
@@ -147,9 +175,11 @@ public class CrimeListFragment extends ListFragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent i = new Intent(getActivity(), CrimePagerActivity.class);
+                /*Intent i = new Intent(getActivity(), CrimePagerActivity.class);
                 i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-                startActivityForResult(i, 0);
+                startActivityForResult(i, 0);*/
+                ((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+                mCallbacks.onCrimeSelected(crime);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

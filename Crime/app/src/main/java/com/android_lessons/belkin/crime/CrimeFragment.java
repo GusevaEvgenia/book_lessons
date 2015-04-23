@@ -57,6 +57,24 @@ public class CrimeFragment extends Fragment {
 
     private static final String DIALOG_IMAGE = "image";
 
+    private Callbacks mCallbacks;
+    /**
+     * Обязательный интерфейс для активности-хоста
+     */
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks)activity;
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
     public static CrimeFragment newInstance(UUID crimeId){
         Bundle args = new Bundle();
         args.putSerializable(EXTRA_CRIME_ID, crimeId);
@@ -89,11 +107,13 @@ public class CrimeFragment extends Fragment {
         if (requestCode == REQUEST_DATE) {
             Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
+            mCallbacks.onCrimeUpdated(mCrime);
             updateDate();
         }
         if (requestCode == REQUEST_TIME) {
             Date date = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
+            mCallbacks.onCrimeUpdated(mCrime);
             updateTime();
         }
         if (requestCode == REQUEST_CONTACT) {
@@ -125,6 +145,7 @@ public class CrimeFragment extends Fragment {
             telphone = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
             pCur.close();
+            mCallbacks.onCrimeUpdated(mCrime);
             c.close();
         }
     }
@@ -156,7 +177,9 @@ public class CrimeFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-               mCrime.setTitle(s.toString());
+                mCrime.setTitle(s.toString());
+                mCallbacks.onCrimeUpdated(mCrime);
+                getActivity().setTitle(mCrime.getTitle());
             }
 
             @Override
@@ -196,6 +219,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                mCallbacks.onCrimeUpdated(mCrime);
             }
         });
 

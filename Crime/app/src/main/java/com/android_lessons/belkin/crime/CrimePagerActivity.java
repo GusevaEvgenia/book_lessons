@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * Created by Belkin on 03.04.2015.
  */
-public class CrimePagerActivity extends ActionBarActivity{ //FragmentActivity{
+public class CrimePagerActivity extends ActionBarActivity implements CrimeFragment.Callbacks{ //FragmentActivity{
 
     private ViewPager mViewPager;
     private ArrayList<Crime> mCrimes;
@@ -63,5 +63,10 @@ public class CrimePagerActivity extends ActionBarActivity{ //FragmentActivity{
                 break;
             }
         }
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
     }
 }
